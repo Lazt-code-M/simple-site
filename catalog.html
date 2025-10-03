@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title id="page-title">Каталог — Детская одежда</title>
+  <style>
+    body { margin: 0; font-family: Arial, sans-serif; background: #fafafa; }
+    header {
+      background: #facf1e;
+      padding: 15px;
+      text-align: center;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+    header a {
+      text-decoration: none;
+      color: #006699;
+      font-weight: bold;
+      font-size: 1.1em;
+    }
+    main {
+      padding: 20px;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+    h1 {
+      color: #e88422;
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    .iframe-wrapper {
+      position: relative;
+      width: 100%;
+      height: 0;
+      padding-bottom: 110%;
+      border-radius: 10px;
+      overflow: hidden;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+    .iframe-wrapper iframe {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      border: none;
+    }
+    .mobile-tip {
+      text-align: center;
+      font-size: 0.9em;
+      color: #666;
+      margin-top: 10px;
+    }
+    .error {
+      text-align: center;
+      color: #d32f2f;
+      padding: 30px;
+	}
+	/* Стили для кнопки скачивания */
+    .download-btn {
+      display: inline-block;
+      padding: 12px 24px;
+      background-color: #4CAF50; /* зелёный */
+      color: white !important;
+      text-decoration: none;
+      border-radius: 6px;
+      font-weight: bold;
+      font-size: 1em;
+      margin: 15px 0;
+      text-align: center;
+      transition: background-color 0.3s ease;
+    }
+
+    .download-btn:hover {
+      background-color: #45a049;
+      text-decoration: none;
+    }
+
+    .download-btn:active {
+      transform: translateY(1px);
+    }
+
+    /* Скрытие кнопки, если она не нужна */
+    .download-btn.hidden {
+      display: none !important;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <a href="index.html">← Назад на главную</a>
+  </header>
+  <main>
+    <h1 id="catalog-title">Загрузка...</h1>
+	<a id="download-link" class="download-btn" target="_blank" rel="noopener noreferrer" download>
+      📥 Скачать каталог-бланк (Excel)
+    </a>
+    <div id="iframe-container" class="iframe-wrapper"></div>
+    <p class="mobile-tip">💡 Совет: прокручивайте таблицу вправо/влево для просмотра всех колонок.</p>
+  </main>
+
+  <script>
+  // === КОНФИГУРАЦИЯ ===
+  const CATALOGS = {
+    accessories: {
+      title: "Аксессуары",
+      url: "https://docs.google.com/spreadsheets/d/e/2PACX-1vSOifPCCfelQ7_6kjcEyTbxeA7LpLN0H22OUyPPyl2LzE60WAP1TbHKrjJq2J8rlthSmIVL0uI-5FFe/pubhtml",
+      exportUrl: "https://docs.google.com/spreadsheets/d/16-VlXuiE--7kbwvBbaoAlW1-wU5sBSxDkvUnWF3A_wI/export?format=xlsx"
+    },
+    diapers: {
+      title: "Пеленки и уголки",
+      url: "https://docs.google.com/spreadsheets/d/e/2PACX-1vQ5zQvH_mAT2WlauMJLaYipogkZNQtCj8dJkZR8_NmN5diGUuk8e3c2KUU5KVg6V0OGiwV_Hpp_cOjS/pubhtml",
+      exportUrl: "https://docs.google.com/spreadsheets/d/1SMZR_KoMSfou7FJ3qDvDF48S6u-mFGQjrHxgH1bhUTM/export?format=xlsx"
+    },
+    "insulated-rompers": {
+      title: "Утепленные комбинезоны",
+      url: "https://docs.google.com/spreadsheets/d/e/2PACX-1vR5RP-mObKApq266sh6DmrBScOhqTOl0feYPd-gFjCHvBeKMDNsLemZX9UJC8ol1RSAkk5zkuE6GE2L/pubhtml",
+	  exportUrl: "https://docs.google.com/spreadsheets/d/1hHeOcDEzPHrTbEqqOdwrENXZqe3LJVFx_EU5bzsWj-M/export?format=xlsx"
+    },
+    "nest-cradle": {
+      title: "Подушки-«гнёздышки» в коляску",
+      url: "https://docs.google.com/spreadsheets/d/e/2PACX-1vQhD1qTNoyaqC3zrfxdT_IBnaE2EsTD7YRmHweNO6E0vBRC5RZFAvO_ZzOvAZ-ZEeSDuMGs51SL7Ifm/pubhtml",
+	  exportUrl: "https://docs.google.com/spreadsheets/d/1-ibt9PAup4C_AX6rhVtdxjLOUFwhvLz6bpbDSGc-COQ/export?format=xlsx"
+    },
+    "vypiska-converts": {
+      title: "Конверты для выписки",
+      url: "https://docs.google.com/spreadsheets/d/e/2PACX-1vS6evkWj3SXznIzIVXROZRGAbS7xsTeKPC2YqBWxpmiiyd9JqDSyjvOTcXRlhS2jZu6H-RRGP-y0h9X/pubhtml",
+	  exportUrl: "https://docs.google.com/spreadsheets/d/1pJO7sd7eAw-QoWeOq0YBO7JaT_dPn0oUqGzo7C_hMpU/export?format=xlsx"
+    },
+    knitwear: {
+      title: "Трикотаж",
+      url: "https://docs.google.com/spreadsheets/d/1rN-41ZIoWM_KvRKVs4MRB0NKibw9R2bE/edit?usp=sharing&ouid=104779532162896017702&rtpof=true&sd=true",
+      exportUrl: "https://docs.google.com/spreadsheets/d/1rN-41ZIoWM_KvRKVs4MRB0NKibw9R2bE/edit?usp=sharing&ouid=104779532162896017702&rtpof=true&sd=true"
+    }
+  };
+
+  // === ЛОГИКА ===
+  function getQueryParam(param) {
+    const urlParams = new URLSearchParams(window.location.search);
+    return urlParams.get(param);
+  }
+
+  function renderCatalog(catKey) {
+    const config = CATALOGS[catKey];
+    const titleEl = document.getElementById('catalog-title');
+    const pageTitleEl = document.getElementById('page-title');
+    const container = document.getElementById('iframe-container');
+    const downloadLink = document.getElementById('download-link');
+
+    if (!config) {
+      titleEl.textContent = "Каталог не найден";
+      container.innerHTML = `<div class="error">Категория "${catKey}" не существует.</div>`;
+      pageTitleEl.textContent = "Ошибка — Каталог";
+      downloadLink.style.display = 'none'; // скрываем кнопку, если нет данных
+      return;
+    }
+
+    // Обновляем заголовки
+    titleEl.textContent = `Каталог: ${config.title}`;
+    pageTitleEl.textContent = `${config.title} — Детская одежда`;
+
+    // Обновляем ссылку на скачивание
+    if (config.exportUrl) {
+	  downloadLink.href = config.exportUrl;
+	  downloadLink.classList.remove('hidden');
+	} else {
+	  downloadLink.classList.add('hidden');
+	}
+
+    // Создаём iframe
+    const iframe = document.createElement('iframe');
+    iframe.src = config.url;
+    iframe.sandbox = "allow-scripts allow-same-origin";
+    iframe.loading = "lazy";
+    iframe.referrerPolicy = "no-referrer";
+    container.innerHTML = '';
+    container.appendChild(iframe);
+  }
+
+  // Запуск
+  const cat = getQueryParam('cat') || 'knitwear';
+  renderCatalog(cat);
+</script>
+</body>
+</html>
